@@ -34,9 +34,11 @@
 #include "conf/RFM69/RFM69UsrCfg.h"
 #include "conf/usart/usartUsrCfg.h"												
 #include "conf/eth/ethUsrCfg.h"
+#include "conf/MCP2515/MCP2515UsrCfg.h"
 #include "conf/hardware/hwBoards.h"
 #include "conf/frame/SoulissCfg.h"
 #include "conf/frame/vNetCfg.h"
+#include "conf/cores/cores.h"
 #include "user/user_config.h"
 
 // Define to zero if not used
@@ -60,11 +62,16 @@
 #define	VNET_MEDIA5_ENABLE	0
 #endif
 
+#ifndef VNET_MEDIA6_ENABLE
+#define VNET_MEDIA6_ENABLE  0
+#endif
+
 const U16 vnet_media_en[VNET_MEDIA_NUMBER] = {VNET_MEDIA1_ENABLE,  // Media 1
 												VNET_MEDIA2_ENABLE,  // Media 2
 												VNET_MEDIA3_ENABLE,  // Media 3
 												VNET_MEDIA4_ENABLE,  // Media 4
-												VNET_MEDIA5_ENABLE   // Media 5	
+												VNET_MEDIA5_ENABLE,   // Media 5	
+                                                VNET_MEDIA6_ENABLE   // Media 6 
 												};
 												
 #endif

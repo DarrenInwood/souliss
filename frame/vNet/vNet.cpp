@@ -93,6 +93,10 @@
 	#include "drivers/generic/usart/vNetDriver_usart.cpp"
 #endif	
 
+#if (VNET_MEDIA6_ENABLE)
+	#include "drivers/mcu_avr/MCP2515/vNetDriver_MCP2515.cpp"
+#endif
+
 #if (VNET_DEBUG)
 	#define VNET_LOG Serial.print	
 #endif
@@ -170,6 +174,10 @@ void vNet_Init()
 	#if (VNET_MEDIA5_ENABLE)
 		vNet_Init_M5();	
 	#endif			
+
+	#if (VNET_MEDIA6_ENABLE)
+		vNet_Init_M6();	
+	#endif	
 }
 
 /**************************************************************************/
@@ -286,6 +294,12 @@ U8 vNet_Send(U16 addr, oFrame *frame, U8 len, U8 port)
 			return vNet_Send_M5(routed_addr, &vNet_oFrame, len + VNET_HEADER_SIZE);		
 		break;
 	#endif
+
+	#if (VNET_MEDIA6_ENABLE)		
+		case(6):	// Send out on Media 6
+			return vNet_Send_M6(routed_addr, &vNet_oFrame, len + VNET_HEADER_SIZE);		
+		break;
+	#endif
 	}
 	
 	#if(VNET_DEBUG) 
@@ -393,6 +407,12 @@ U8 vNet_SendBroadcast(oFrame *frame, U8 len, U8 port, U16 broadcast_addr)
 					vNet_Send_M5(broadcast_addr, &vNet_oFrame, len + VNET_HEADER_SIZE);		
 				break;
 			#endif
+
+			#if (VNET_MEDIA6_ENABLE)		
+				case(6):	// Send out on Media 5
+					vNet_Send_M6(broadcast_addr, &vNet_oFrame, len + VNET_HEADER_SIZE);		
+				break;
+			#endif
 			}	
 		}
 	}		
@@ -494,6 +514,12 @@ U8 vNet_SendMulticast(oFrame *frame, U8 len, U8 port, U16 multicastgroup)
 		#if (VNET_MEDIA5_ENABLE)		
 			case(5):	// Send out on Media 5
 				vNet_Send_M5(broadcast_addr, &vNet_oFrame, len + VNET_HEADER_SIZE);		
+			break;
+		#endif
+
+		#if (VNET_MEDIA6_ENABLE)		
+			case(6):	// Send out on Media 5
+				vNet_Send_M6(broadcast_addr, &vNet_oFrame, len + VNET_HEADER_SIZE);		
 			break;
 		#endif
 		}
@@ -602,6 +628,12 @@ U8 vNet_SendRoute(U16 routed_addr, U8 media, U8 *data, U8 len)
 			return vNet_Send_M5(routed_addr, &vNet_oFrame, len);		
 		break;
 	#endif		
+
+	#if (VNET_MEDIA6_ENABLE)	
+		case(6):	// Send out on Media 6
+			return vNet_Send_M6(routed_addr, &vNet_oFrame, len);		
+		break;
+	#endif
 	}
 
 }
@@ -656,6 +688,14 @@ U8 vNet_DataAvailable()
 		}	
 	#endif	
 	
+	#if (VNET_MEDIA6_ENABLE)
+		if(vNet_DataAvailable_M6())
+		{
+			vNet_Media_Data[5].data_available = 1;
+			i++;
+		}	
+	#endif
+
 	// If there are no data available, increase the resettime timer
 	if(!i)	resettime++;
 	else	resettime=0;
@@ -707,6 +747,11 @@ U8 vNet_GetPort()
 		if(vNet_Media_Data[4].data_available == 1)
 			return vNet_Media_Data[4].port;	
 	#endif	
+
+	#if (VNET_MEDIA6_ENABLE)
+		if(vNet_Media_Data[5].data_available == 1)
+			return vNet_Media_Data[5].port;	
+	#endif
 	
 	return VNET_DATA_FAIL;	// No data retrieved
 }
@@ -870,6 +915,28 @@ U8 vNet_RetrieveData(U8 *data)
 		}	
 
 	#endif	
+
+	#if (VNET_MEDIA6_ENABLE)
+		if(vNet_Media_Data[5].data_available == 1)
+		{
+			// Retrieve data from buffer
+			if(vNet_RetrieveData_M6(data))
+			{
+				vNet_Media_Data[5].data = data;		// Assign Data Buffer
+				vNet_ParseFrame(6);					// Parse Data Buffer
+			
+				last_media = 6;
+				vNet_Media_Data[5].data_available = 0;
+				
+				// Route data and remove header, if necessary
+				return vNet_RoutingBridging(6);
+			}
+			// If retrieve failed, return error
+			vNet_Media_Data[5].data_available = 0;
+			return VNET_DATA_FAIL;	
+		}
+
+	#endif	
 	
 	return VNET_DATA_FAIL;	// No data retrieved
 }
@@ -922,7 +989,13 @@ void vNet_SetAddress(U16 addr, U8 media)
 		case(5):	// Write out on Media 5
 			vNet_SetAddress_M5(addr);		
 		break;
-	#endif		
+	#endif
+
+	#if (VNET_MEDIA6_ENABLE)	
+		case(6):	// Write out on Media 6
+			vNet_SetAddress_M6(addr);		
+		break;
+	#endif
 	}
 }
 
@@ -1079,6 +1152,13 @@ U8 vNet_MyMedia()
 	while(!vnet_media_en[i] && i < VNET_MEDIA_NUMBER - 1)
 		i++;
 	
+	// The VNET_MEDIA3 is always used together with VNET_MEDIA1 to 
+	// decouple the vNet address from the IP address. In this case 
+	// all the vNet traffic between nodes shall be transferred over
+	// VNET_MEDIA3
+	if((i==VNET_MEDIA1_ID) && vnet_media_en[VNET_MEDIA3_ID])
+		return VNET_MEDIA3_ID+1;
+
 	if(vnet_media_en[i])
 		return i+1;
 	else
@@ -1179,17 +1259,19 @@ void vNet_OutPath(U16 addr, U16 *routed_addr, U8 *media)
 		#endif		
 		
 		// Search for devices that shall be reached
-		while ((route_index < VNET_ROUTING_TABLE) && (donot_route_table[route_index] != *routed_addr))	
+		route_index = 0;
+		while ((route_index < VNET_ROUTING_TABLE) && (donot_route_table[route_index]) && (donot_route_table[route_index] != *routed_addr))	
 			route_index++;														   	
 		
 		// If the address is in the list, drop it
-		if(donot_route_table[route_index] != *routed_addr)
+		if(donot_route_table[route_index] == *routed_addr)
+		{
 			*routed_addr = 0x0000;
 
-		#if(VNET_DEBUG)
-		VNET_LOG(F("(vNet)<DONTROUTE>\r\n"));
-		#endif
-
+			#if(VNET_DEBUG)
+			VNET_LOG(F("(vNet)<DONTROUTE>\r\n"));
+			#endif
+		}
 		#else	
 		// Route to my supernode
 			
@@ -1406,6 +1488,12 @@ void vNet_ParseFrame(U8 media)
 			vNet_Media_Data[media-1].src_addr = vNet_GetSourceAddress_M5(); 
 		break;
 	#endif	
+
+	#if (VNET_MEDIA6_ENABLE)
+		case(6):
+			vNet_Media_Data[media-1].src_addr = vNet_GetSourceAddress_M6(); 
+		break;
+	#endif
 		
 	}
 	
@@ -1531,6 +1619,10 @@ void vNet_Reset()
 		vNet_Init_M5();	
 	#endif	
 
+	#if (VNET_MEDIA6_ENABLE)
+		vNet_Init_M6();	
+	#endif
+
 	// Set the address for the active media
 	for(U8 media=0;media<VNET_MEDIA_NUMBER;media++)
 	{
@@ -1566,6 +1658,12 @@ void vNet_Reset()
 				vNet_SetAddress_M5(vNet_Media[media].src_addr);		
 			break;
 		#endif		
+
+		#if (VNET_MEDIA6_ENABLE)	
+			case(VNET_MEDIA6_ID):	// Write out on Media 6
+				vNet_SetAddress_M6(vNet_Media[media].src_addr);		
+			break;
+		#endif
 		}
 	}		
 }

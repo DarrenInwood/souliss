@@ -224,13 +224,14 @@
 		Communication Media 5	-	USART with collision avoidance 	
 */
 /**************************************************************************/
-#define VNET_MEDIA_NUMBER   5		// Number of total media
+#define VNET_MEDIA_NUMBER   6		// Number of total media
 
 #define VNET_MEDIA1_ID  0
 #define VNET_MEDIA2_ID  1
 #define VNET_MEDIA3_ID  2
 #define VNET_MEDIA4_ID  3
 #define VNET_MEDIA5_ID  4
+#define VNET_MEDIA6_ID  5
 
 #ifndef VNET_MEDIA_INSKETCH
 #	define VNET_MEDIA1_ENABLE  0
@@ -238,13 +239,15 @@
 #	define VNET_MEDIA3_ENABLE  0
 #	define VNET_MEDIA4_ENABLE  0
 #	define VNET_MEDIA5_ENABLE  0
+#	define VNET_MEDIA6_ENABLE  0
 
 
 	const U16 vnet_media_en[VNET_MEDIA_NUMBER] = {VNET_MEDIA1_ENABLE,  // Media 1
 												  VNET_MEDIA2_ENABLE,  // Media 2
 												  VNET_MEDIA3_ENABLE,  // Media 3
 												  VNET_MEDIA4_ENABLE,  // Media 4
-												  VNET_MEDIA5_ENABLE   // Media 5	
+												  VNET_MEDIA5_ENABLE,  // Media 5	
+												  VNET_MEDIA6_ENABLE   // Media 6	
 												};
 #endif
 
@@ -271,6 +274,9 @@
 #define VNET_ADDR_L_M5	   	0xCE00			// vNet Low Address for Media 5,  size 4 byte
 #define VNET_ADDR_H_M5	   	0xDFFF			// vNet High Address for Media 5, size 4 byte
 
+#define VNET_ADDR_L_M6	   	0xE000			// vNet Low Address for Media 6,  size 4 byte
+#define VNET_ADDR_H_M6	   	0xE1FF			// vNet High Address for Media 6, size 4 byte
+
 #define	VNET_ADDR_L_MLC		0xF100			// First MULTICAST address
 #define	VNET_ADDR_H_MLC		0xFCFF			// Last  MULTICAST address
 
@@ -284,14 +290,16 @@ const U16 vnet_addr_l[VNET_MEDIA_NUMBER] = {VNET_ADDR_L_M1,  // Media 1
 											VNET_ADDR_L_M2,  // Media 2
 											VNET_ADDR_L_M3,  // Media 3
 											VNET_ADDR_L_M4,  // Media 4
-											VNET_ADDR_L_M5   // Media 5
+											VNET_ADDR_L_M5,  // Media 5
+											VNET_ADDR_L_M6   // Media 6
 											};
 							  
 const U16 vnet_addr_h[VNET_MEDIA_NUMBER] = {VNET_ADDR_H_M1, // Media 1
 											VNET_ADDR_H_M2, // Media 2
 											VNET_ADDR_H_M3, // Media 3
 											VNET_ADDR_H_M4, // Media 4
-											VNET_ADDR_H_M5  // Media 5
+											VNET_ADDR_H_M5, // Media 5
+											VNET_ADDR_H_M6  // Media 6
 											};
 											
 #endif

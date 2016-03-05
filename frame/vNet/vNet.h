@@ -90,6 +90,10 @@
 	#include "drivers/generic/usart/vNetDriver_usart.h"	
 #endif	
 
+#if (VNET_MEDIA6_ENABLE)
+	#include "drivers/mcu_avr/MCP2515/vNetDriver_MCP2515.h"	
+#endif
+
 #define time_justbooted		300000			// Five minutes in milliseconds
 #define JustBooted()	(millis() < time_justbooted)
 
