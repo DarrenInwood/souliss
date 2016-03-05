@@ -70,6 +70,7 @@
 #define Souliss_T68						0x68            // Pressure measure (0, 1500) hPa 
 #define Souliss_T69						0x69
 #define Souliss_TRL						0xFF			// Related association, i
+
 // General defines for T1n
 #define Souliss_T1n_ToggleCmd			0x01		// Toggle Command
 #define Souliss_T1n_OnCmd				0x02		// ON Command
@@ -98,7 +99,14 @@
 #define Souliss_T1n_AutoOnCoil			0xF1		// Output Feedback ON in AUTO Mode
 #define Souliss_T1n_AutoOffCoil			0xF0		// Output Feedback OFF in AUTO Mode
 #define Souliss_T1n_GoodNight			0xF1		// Output Feedback ON in GoodNight Mode
-#define Souliss_T1n_BrightValue			0x10		
+#define Souliss_T1n_BrightValue			0x10		// Default increase and decrease
+#define Souliss_T1n_BrightDefault		0xAA		// Default Bright Value
+
+// Useful defines for T16
+#define	Souliss_T1n_MaxBright			0xFF
+#define	Souliss_T1n_MinBright			0x00
+#define	Souliss_T1n_BrightStep			0x0A
+#define	Souliss_T1n_BrightDefault		0x50
 
 /*
 
@@ -181,9 +189,10 @@
 #define Souliss_T3n_FanHigh				0x09		// Heating / Cooling Fan High
 #define Souliss_T3n_FanAuto				0x0A		// Heating / Cooling Fan Automatic
 #define Souliss_T3n_FanManual			0x0B		// Heating / Cooling Fan Manual
-#define Souliss_T3n_DeadBand			0.01		// Percentage Deadband
-#define Souliss_T3n_ThMed				0.10		// Threshold for medium speed
-#define Souliss_T3n_ThHigh				0.15		// Threshold for high speed
+#define Souliss_T3n_DeadBand			0.6			// Degrees Deadband
+#define Souliss_T3n_Hysteresis			0.5			// Degrees Hysteresis
+#define Souliss_T3n_ThMed				1.2 		// Threshold for medium speed
+#define Souliss_T3n_ThHigh				3   		// Threshold for high speed
 #define Souliss_T3n_SetTemp				0x0C		// Set the setpoint
 #define Souliss_T3n_ShutDown			0x0D		// Shut down heating and cooling
 

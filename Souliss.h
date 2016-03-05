@@ -14,19 +14,19 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	Originally developed by Dario Di Maio
-	
+
 ***************************************************************************/
 /*!
-    \file 
+    \file
     \ingroup
 */
 #ifndef SOULISSSKETCHMODE_H
 #define SOULISSSKETCHMODE_H
 
 /*************************************/
-/*!	
+/*!
 	All code is compiled into the sketch, without creating middle
 	object files. This let use #define that are globally recognized
 	in the whole code, including sub-libraries.
@@ -52,7 +52,7 @@
 #		define MAXINPIN		29		// Max number of input pins
 #	endif
 #elif(MCU_TYPE == 0x02)	// Expressif ESP8266
-#	define MAXINPIN		29		// Max number of input pins	
+#	define MAXINPIN		29		// Max number of input pins
 #endif
 
 void Souliss_SetAddress(U16 addr, U16 subnetmask, U16 mysupernode);
@@ -67,7 +67,7 @@ void Souliss_BatteryChannels(U8 *memory_map, U16 addr);
 U8 Souliss_HardcodedCommunicationChannel(U16 gateway_addr);
 void Souliss_JoinNetwork();
 void Souliss_SetIPAddress(U8* ip_address, U8* subnet_mask, U8* ip_gateway);
-void Souliss_GetIPAddress();
+uint8_t Souliss_GetIPAddress(U8 timeout);
 void Souliss_SetAccessPoint();
 uint8_t Souliss_ReadIPConfiguration();
 void Souliss_SetAddressingServer(U8 *memory_map);
@@ -84,8 +84,10 @@ U8 Souliss_PublishData(U8 *memory_map, U16 message, U8 action, U8* data, U8 mess
 U8 Souliss_MulticastPublishData(U16 multicast_addr, U8 *memory_map, U16 message, U8 action, U8* data, U8 message_len);
 U8 Souliss_Subscribe(U8 *memory_map, U16 message, U8 action);
 U8 Souliss_SubscribeData(U8 *memory_map, U16 message, U8 action, U8* data, U8* len);
+U8 Souliss_PullData(U16 addr, U8 slot, U8 remote_slot, U8 remote_numbof);
 U8 Souliss_CommunicationData(U8 *memory_map, U8 *trigger);
 U8 Souliss_Watchdog(U8 *memory_map, U16 chain_address, U8 chain_slot, U8 alarm_command);
+U8 Souliss_UnsupportedCommand();
 
 U8 Souliss_DigIn(U8 pin, U8 value, U8 *memory_map, U8 slot, bool filteractive);
 U8 Souliss_LowDigIn(U8 pin, U8 value, U8 *memory_map, U8 slot, bool filteractive);
@@ -121,7 +123,7 @@ void Souliss_ResetOutput(U8 *memory_map, U8 slot);
 void Souliss_ResetInput(U8 *memory_map, U8 slot);
 U8 Souliss_isTrigged(U8 *memory_map, U8 slot);
 float Souliss_SinglePrecisionFloating(U8 *input);
-uint16_t Souliss_HalfPrecisionFloating(U8 *output, float *input);
+void Souliss_HalfPrecisionFloating(U8 *output, float *input);
 
 #if(MCU_TYPE == 0x01) 	// Atmel AVR Atmega
 #	if(HTTPSERVER && VNET_MEDIA1_ENABLE && (ETH_W5100 || ETH_W5200 || ETH_W5500))
@@ -136,6 +138,7 @@ uint16_t Souliss_HalfPrecisionFloating(U8 *output, float *input);
 #		include "interfaces/mcu_avr/Modbus.h"
 #	endif
 #elif(MCU_TYPE == 0x02)	// Expressif ESP8266
+#       include "interfaces/mcu_esp8266/OTA.h"
 #	if(WEBCONFIGSERVER)
 #		include "interfaces/mcu_esp8266/webconfig/webconfig.h"
 #	endif
@@ -181,7 +184,7 @@ uint16_t Souliss_HalfPrecisionFloating(U8 *output, float *input);
 	#	include "interfaces/mcu_esp8266/webconfig/webconfig.cpp"
 	#endif
 #endif
-	
+
 
 #if(MCU_TYPE == 0x01)	// ATmega AVR
 #elif(MCU_TYPE == 0x02)	// Expressif ESP8266
@@ -209,7 +212,6 @@ uint16_t Souliss_HalfPrecisionFloating(U8 *output, float *input);
 #include "frame/MaCaco/MaCaco.h"
 #include "frame/vNet/vNet.h"
 
-#include "base/SpeakEasy.h"
 #include "user/user_config.h"
 
 #endif

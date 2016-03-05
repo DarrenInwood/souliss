@@ -51,6 +51,7 @@ unsigned long tmr_fast=0, tmr_slow=0;
 #define	FAST_70ms()		if (!(phase_fast % 7))
 #define	FAST_90ms()		if (!(phase_fast % 9))
 #define	FAST_110ms()	if (!(phase_fast % 11))
+#define FAST_210ms()	if (!(phase_fast % 21))
 #define	FAST_510ms()	if (!(phase_fast % 51))
 #define	FAST_710ms()	if (!(phase_fast % 71))
 #define	FAST_910ms()	if (!(phase_fast % 91))
@@ -63,6 +64,24 @@ unsigned long tmr_fast=0, tmr_slow=0;
 #define	FAST_71110ms()	if (!(phase_fast % 7111))
 #define	FAST_91110ms()	if (!(phase_fast % 9111))
 
+#define	SHIFT_10ms(n)		if ((phase_fast % 1)==n)
+#define	SHIFT_30ms(n)		if ((phase_fast % 3)==n)
+#define	SHIFT_50ms(n)		if ((phase_fast % 5)==n)
+#define	SHIFT_70ms(n)		if ((phase_fast % 7)==n)
+#define	SHIFT_90ms(n)		if ((phase_fast % 9)==n)
+#define	SHIFT_110ms(n)		if ((phase_fast % 11)==n)
+#define SHIFT_210ms(n)		if ((phase_fast % 21)==n)
+#define	SHIFT_510ms(n)		if ((phase_fast % 51)==n)
+#define	SHIFT_710ms(n)		if ((phase_fast % 71)==n)
+#define	SHIFT_910ms(n)		if ((phase_fast % 91)==n)
+#define	SHIFT_1110ms(n)		if ((phase_fast % 111)==n)
+#define	SHIFT_2110ms(n)		if ((phase_fast % 211)==n)
+#define	SHIFT_7110ms(n)		if ((phase_fast % 711)==n)
+#define	SHIFT_9110ms(n)		if ((phase_fast % 911)==n)
+#define	SHIFT_11110ms(n)	if ((phase_fast % 1111)==n)
+#define	SHIFT_21110ms(n)	if ((phase_fast % 2111)==n)
+#define	SHIFT_71110ms(n)	if ((phase_fast % 7111)==n)
+#define	SHIFT_91110ms(n)	if ((phase_fast % 9111)==n)
 
 #define EXECUTESLOW()	else if(abs(millis()-tmr_slow) > time_base_slow)
 #define UPDATESLOW()	tmr_slow = millis();	\
@@ -271,6 +290,7 @@ unsigned long tmr_fast=0, tmr_slow=0;
 #define	Send													Souliss_RemoteInput
 #define	SendData												Souliss_RemoteInputs
 #define	ResetInput(slot)										Souliss_ResetInput(memory_map, slot)
+#define PullData(addr, slot, remote_slot, remote_numbof)		Souliss_PullData(addr, slot, remote_slot, remote_numbof)
 #define	RoutingTable											vNet_SetRoutingTable
 #define	DonotRouteTable											vNet_SetDoNotRoutingTable
 #define	Init_XMLServer()										XMLSERVERInit(memory_map)
